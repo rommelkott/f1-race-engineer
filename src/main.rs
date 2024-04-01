@@ -6,13 +6,11 @@ use packet::*;
 mod parsers;
 use parsers::*;
 
-
-
 fn main() {
     println!("Running");
     let socket = UdpSocket::bind("192.168.1.26:20777").unwrap();
 
-    // create raw context to store data that will be passed to the handler function, it should be passed as a mutable reference
+    // context to be used by the stream handler and the main loop
     let context = Arc::new(Mutex::new(Context::new()));
 
     // create seperate thread to handle the stream
@@ -21,13 +19,10 @@ fn main() {
         handle_stream(&socket, &passable_context);
     });
 
-    // every 5 seconds print the lap data
-    // let clone_context = context.clone();
+    // sample main loop to print the lap data
     loop {
         std::thread::sleep(std::time::Duration::from_secs(5));
         let clone = context.lock().unwrap();
-        let lap_data = &clone.lap_data;
-        // clear the screen
         print!("\x1B[2J\x1B[1;1H");
         println!("{:?}", clone.lap_data);
     }
